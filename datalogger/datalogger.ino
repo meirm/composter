@@ -1,21 +1,18 @@
+#include "config.h"
+#if USESDCARD == YES
 #include <SPI.h>
-#include <SD.h>  
-#include "DHT.h" // temp and humidity sensor
+#include <SD.h>
+#endif
+#include "DHT.h"  // temp and humidity sensor
 #define DHTTYPE DHT11
 
 //RTC
-#include <ThreeWire.h>  
+#include <ThreeWire.h>
 #include <RtcDS1302.h>
-ThreeWire myWire(4,5,2); // IO, SCLK, CE
+ThreeWire myWire(IO, SCLK, CE);
 RtcDS1302<ThreeWire> Rtc(myWire);
 
 //Thermistor
-int thermistorPin = 7;
-int thermistorOut = A1;
-int refres = 10000;
-float nominalres = 100000.0;
-int nominaltemp = 25;
-int bcoef = 3950;
 
 File myFile;
 const int chipSelect = 10;  //CS on Card reader
@@ -39,31 +36,31 @@ void setup() {
   Serial.print("Initializing SD card . . .  ");
 
   pinMode(thermistorPin, OUTPUT);
-
+#if USESDCARD == YES
   if (!SD.begin()) {
     Serial.println("initialization failed!");
     return;
   }
-  Serial.println("initialization done."); 
-  
-  dht.begin(); // initilize DHT temp and humi sensor
+  Serial.println("initialization done.");
+#endif
+  dht.begin();  // initilize DHT temp and humi sensor
 
 
-  Rtc.Begin(); // initilize RTC DS 1302
+  Rtc.Begin();  // initilize RTC DS 1302
   RtcDateTime compiledTime = RtcDateTime(__DATE__, __TIME__);
   Serial.print(__DATE__);
   Serial.println(__TIME__);
 
 
-    // RTC issues
+  // RTC issues
   if (!Rtc.IsDateTimeValid()) {
     Serial.print("RTC lost confidence in the DateTime");
     //Rtc.SetDateTime(compiledTime);  // set RTC time to current PC time
   }
   if (!Rtc.GetIsRunning()) {
-      Serial.println("RTC was not actively running, starting now");
-      Rtc.SetIsRunning(true);
-    }
+    Serial.println("RTC was not actively running, starting now");
+    Rtc.SetIsRunning(true);
+  }
   /*if (Rtc.GetIsWriteProtected())
     {
         Serial.println("RTC was write protected, enabling writing now");
@@ -71,8 +68,8 @@ void setup() {
     }  */
 
 
-  // INITILIZE SD CARD 
-  myFile = SD.open("log.txt", FILE_WRITE); 
+  // INITILIZE SD CARD
+  myFile = SD.open("log.txt", FILE_WRITE);
   if (myFile) {
     Serial.println("Writing to log.txt");
     myFile.print("Initilization done.");
@@ -83,11 +80,11 @@ void setup() {
   delay(1000);
 
 
-  //  RTC check time    
+  //  RTC check time
   RtcDateTime now = Rtc.GetDateTime();
   myFile = SD.open("log.txt", FILE_WRITE);
   if (now < compiledTime) {
-    Serial.println("RTC is older than compiled time");  
+    Serial.println("RTC is older than compiled time");
     myFile.println(" Time is not logged properly.");
     myFile.close();
   } else {
@@ -100,14 +97,14 @@ void setup() {
 
 void loop() {
   RtcDateTime now = Rtc.GetDateTime();  // get datetime
- 
+
   //get readings
   soilMoisture = analogRead(soilPin);
   soilMoisture = map(soilMoisture, 1023, 0, 0, 100);
   humi = dht.readHumidity();
   tempC = dht.readTemperature();
 
-  digitalWrite(thermistorPin, HIGH); 
+  digitalWrite(thermistorPin, HIGH);
   float temp2read;
   temp2read = analogRead(thermistorOut);
   digitalWrite(thermistorPin, LOW);  // to prevent overheating / flase readings
@@ -145,44 +142,42 @@ void loop() {
     myFile.print(char(176));
     myFile.print("C  Humidity: ");
     myFile.print(humi);
-    myFile.println("%");  
+    myFile.println("%");
     myFile.close();
   } else {
     Serial.println("Error writing to file");
-    }
+  }
   delay(2000);
 }
 
 
 #define countof(a) (sizeof(a) / sizeof(a[0]))
-void printDateTime(const RtcDateTime& dt)
-{
-    char datestring[20];
+void printDateTime(const RtcDateTime& dt) {
+  char datestring[20];
 
-    snprintf_P(datestring, 
-            countof(datestring),
-            PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
-            dt.Day(),
-            dt.Month(),
-            dt.Year(),
-            dt.Hour(),
-            dt.Minute(),
-            dt.Second() );
-    Serial.print(datestring);
+  snprintf_P(datestring,
+             countof(datestring),
+             PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
+             dt.Day(),
+             dt.Month(),
+             dt.Year(),
+             dt.Hour(),
+             dt.Minute(),
+             dt.Second());
+  Serial.print(datestring);
 }
 
-void printDateTimeFile(const RtcDateTime& dt)
-{
-    char datestring[20];
+void printDateTimeFile(const RtcDateTime& dt) {
+  char datestring[20];
 
-    snprintf_P(datestring, 
-            countof(datestring),
-            PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
-            dt.Day(),
-            dt.Month(),
-            dt.Year(),
-            dt.Hour(),
-            dt.Minute(),
-            dt.Second() );
-    myFile.print(datestring);
+  snprintf_P(datestring,
+             countof(datestring),
+             PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
+             dt.Day(),
+             dt.Month(),
+             dt.Year(),
+             dt.Hour(),
+             dt.Minute(),
+             dt.Second());
+  myFile.print(datestring);
 }
