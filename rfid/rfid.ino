@@ -25,7 +25,7 @@ void loop()
 {
   
   //Wait until new tag is available
-  while (getID()) 
+  if (getID()) 
   {
     if ((tagID == MasterTag) || (DEBUG == true)) 
     {
