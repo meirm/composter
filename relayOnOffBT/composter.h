@@ -1,8 +1,9 @@
 class COMPOSTER {
 public:
-  COMPOSTER(int IO_Motor, int IO_LoadInterrupt, int IO_DischargeInterrupt);
+  COMPOSTER(int IO_Motor, int IO_Dir,int IO_LoadInterrupt, int IO_DischargeInterrupt);
   void stop();
   void run();
+  void restart();
   void runCycle(int numberCycles);
   void stopCycle();
   bool isCycling();
@@ -12,6 +13,7 @@ public:
   bool stopOnLoad(void);
   bool stopOnDischarge(void);
   void beat();
+  void switchDir();
   int getMaxCycles();
   void setMaxCycles(int max);
   int getRemindingCycles();
@@ -24,12 +26,16 @@ private:
   unsigned long timeOn;
   unsigned long timeOff;
   unsigned long lastSwitch;
-  int relay;
+  int relay_motor;
+  int relay_direction;
   int loadIntIO;
   int disIntIO;
   bool _stopOnLoad;
   bool _stopOnDischarge;
   bool turning;
+  bool direction;
+  #define right false
+  #define left true
   int currCycle;
   int maxcycles;
 };
