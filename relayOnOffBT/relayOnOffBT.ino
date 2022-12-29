@@ -18,7 +18,7 @@ char buff[128];
 bool gotNewLine = false;
 int pos = 0;
 
-COMPOSTER composter(4, 0, 12, 14);
+COMPOSTER composter(4, 2, 26, 14);
 
 
 void setup() {
