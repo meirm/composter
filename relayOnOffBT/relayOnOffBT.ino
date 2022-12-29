@@ -18,7 +18,8 @@ char buff[128];
 bool gotNewLine = false;
 int pos = 0;
 
-COMPOSTER composter(4, 12, 14);
+COMPOSTER composter(4, 0, 12, 14);
+
 
 void setup() {
   Serial.begin(115200);
@@ -73,6 +74,9 @@ bool processCommand(char* buff) {
     retValue = true;
   } else if (strcmp2(buff, (char*)"ON")) {
     composter.run();  // NO
+    retValue = true;
+  } else if (strcmp2(buff, (char*)"SWITCH")) {
+    composter.switchDir();  // NO
     retValue = true;
   } else if (strcmp2(buff, (char*)"LAST")) {
     int secs = composter.secsLastSwitch();

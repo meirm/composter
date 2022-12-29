@@ -1,11 +1,14 @@
 #include "Arduino.h"
 #include "composter.h"
 
-COMPOSTER::COMPOSTER(int IO_Motor, int IO_LoadInterrupt, int IO_DischargeInterrupt) {
-  relay = IO_Motor;
+COMPOSTER::COMPOSTER(int IO_Motor, int IO_Dir, int IO_LoadInterrupt, int IO_DischargeInterrupt) {
+  relay_motor = IO_Motor;
   loadIntIO = IO_LoadInterrupt;
   disIntIO = IO_DischargeInterrupt;
-  pinMode(relay, OUTPUT);
+  direction = false;
+  relay_direction = IO_Dir;
+  pinMode(relay_motor, OUTPUT);
+  pinMode(relay_direction, OUTPUT);
   pinMode(IO_LoadInterrupt, INPUT_PULLUP);
   pinMode(IO_DischargeInterrupt, INPUT_PULLUP);
   this->stop();
@@ -68,16 +71,26 @@ bool COMPOSTER::isRunning() {
   return this->turning;
 }
 
+void COMPOSTER::restart(){
+  digitalWrite(relay_motor, LOW);  //NO
+  digitalWrite(relay_direction,this->direction);
+  digitalWrite(relay_motor, HIGH);  //NO
+}
 void COMPOSTER::run() {
   turning = true;
-  digitalWrite(relay, HIGH);  //NO
+  digitalWrite(relay_motor, HIGH);  //NO
+}
+
+void COMPOSTER::switchDir(){
+  this->direction = ! this->direction;
+  if(this->isRunning()) {this->restart();}
 }
 
 void COMPOSTER::stop() {
   turning = false;
   this->_stopOnLoad = false;
   this->_stopOnDischarge = false;
-  digitalWrite(relay, LOW);  //NO
+  digitalWrite(relay_motor, LOW);  //NO
 }
 
 bool COMPOSTER::stopOnLoad() {
