@@ -73,7 +73,7 @@ bool COMPOSTER::isRunning() {
 
 void COMPOSTER::restart(){
   digitalWrite(relay_motor, LOW);  //NO
-  digitalWrite(relay_direction,this->direction`);
+  digitalWrite(relay_direction,this->direction);
   digitalWrite(relay_motor, HIGH);  //NO
 }
 void COMPOSTER::run() {
